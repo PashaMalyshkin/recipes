@@ -38,6 +38,6 @@ export const ingredientsToRecipesRelations = relations(
 
 export const ingredientsRelations = relations(ingredients, ({ many }) => ({
   ingredientsToRecipes: many(ingredientsToRecipes, {
-    relationName: "ingredients_relation",
+    relationName: "ingredients_to_recipes",
   }),
 }));
