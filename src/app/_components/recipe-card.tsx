@@ -13,7 +13,7 @@ export const RecipeCard: React.FC<{
 }> = ({ recipe }) => {
   return (
     <li className="cursor-pointer duration-300 hover:scale-105">
-      <Card className="min-h-[300px]">
+      <Card className="h-full min-h-[300px]">
         <CardHeader>
           <CardTitle>{recipe.title}</CardTitle>
           <CardDescription>{recipe.description}</CardDescription>
