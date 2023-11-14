@@ -2,22 +2,21 @@
 
 import { api } from "~/trpc/react";
 import { RecipeCard } from "./recipe-card";
-import { RecipesListSkeleton } from "./recipes-list-skeleton";
+import { NoRecipes } from "./no-recipes";
 
 export const RecipesList = () => {
-  const { data, isLoading } = api.recipes.getAllRecipes.useQuery();
+  const [recipes] = api.recipes.getAllRecipes.useSuspenseQuery();
 
   return (
-    <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-      {isLoading || !data ? (
-        <RecipesListSkeleton />
-      ) : (
-        <>
-          {data.map((recipe) => (
+    <>
+      {!recipes.length && <NoRecipes />}
+      {recipes.length && (
+        <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+          {recipes.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
-        </>
+        </ul>
       )}
-    </ul>
+    </>
   );
 };
