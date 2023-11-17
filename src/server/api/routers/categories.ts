@@ -1,5 +1,4 @@
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { db } from "~/server/db/schema";
 
 export const categories = createTRPCRouter({
   getCategories: publicProcedure.query(async ({ ctx }) => {
