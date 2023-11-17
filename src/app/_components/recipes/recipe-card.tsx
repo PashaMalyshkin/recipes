@@ -5,8 +5,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { IngredientsList } from "./ingredients-list";
+} from "../ui/card";
+import { IngredientsList } from "../ingredients/card-ingredients-list";
 
 export const RecipeCard: React.FC<{
   recipe: RouterOutputs["recipes"]["getAllRecipes"][number];
