@@ -222,21 +222,16 @@ export const CreateRecipeDialog = () => {
           onSubmit={handleSubmit(onAddRecipe)}
         >
           <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="name"
-              className={cn("text-left", {
-                "text-red-500": errors.name,
-              })}
-            >
+            <Label htmlFor="name" className={cn(errors.name && "text-red-500")}>
               {errors.name ? errors.name.message : "Name"}
             </Label>
             <Input
               id="name"
               placeholder="Pizza"
-              className={cn({
-                "border-red-600 bg-red-200 placeholder:text-slate-600":
-                  errors.name,
-              })}
+              className={cn(
+                errors.name &&
+                  "border-red-600 bg-red-200 placeholder:text-slate-600",
+              )}
               {...register("name", {
                 required: {
                   value: true,
@@ -262,9 +257,7 @@ export const CreateRecipeDialog = () => {
           <div className="flex flex-col gap-2">
             <Label
               htmlFor="category"
-              className={cn({
-                "text-red-500": errors.categoryId,
-              })}
+              className={cn(errors.categoryId && "text-red-500")}
             >
               {errors.categoryId ? errors.categoryId.message : "Category"}
             </Label>
@@ -281,10 +274,10 @@ export const CreateRecipeDialog = () => {
                 <Select onValueChange={onChange}>
                   <SelectTrigger
                     id="categoryId"
-                    className={cn({
-                      "border-red-600 bg-red-200 placeholder:text-slate-600":
-                        errors.categoryId,
-                    })}
+                    className={cn(
+                      errors.categoryId &&
+                        "border-red-600 bg-red-200 placeholder:text-slate-600",
+                    )}
                   >
                     <SelectValue placeholder="Select Category" />
                   </SelectTrigger>
@@ -312,18 +305,16 @@ export const CreateRecipeDialog = () => {
           <div className="flex flex-col gap-2">
             <Label
               htmlFor="description"
-              className={cn({
-                "text-red-500": errors.description,
-              })}
+              className={cn(errors.description && "text-red-500")}
             >
               {errors.description ? errors.description.message : "Description"}
             </Label>
             <Textarea
               id="description"
-              className={cn({
-                "border-red-600 bg-red-200 placeholder:text-slate-600":
-                  errors.description,
-              })}
+              className={cn(
+                errors.description &&
+                  "border-red-600 bg-red-200 placeholder:text-slate-600",
+              )}
               {...register("description", {
                 required: {
                   value: true,
@@ -339,9 +330,7 @@ export const CreateRecipeDialog = () => {
           <div className="flex flex-col gap-2">
             <Label
               htmlFor="ingredients"
-              className={cn({
-                "text-red-500": errors.ingredients,
-              })}
+              className={cn(errors.ingredients && "text-red-500")}
             >
               {errors.ingredients ? errors.ingredients.message : "Ingredients"}
             </Label>
@@ -351,9 +340,9 @@ export const CreateRecipeDialog = () => {
               rules={{
                 required: { value: true, message: "Ingredients are required" },
               }}
-              render={({ field: { onChange, value } }) => (
+              render={({ field: { onChange, value = [] } }) => (
                 <IngredientsCombobox
-                  selectedIngredients={value || []}
+                  selectedIngredients={value}
                   onSelect={onChange}
                   error={errors.ingredients}
                 />
@@ -363,19 +352,17 @@ export const CreateRecipeDialog = () => {
           <div className="flex flex-col gap-2">
             <Label
               htmlFor="author"
-              className={cn("text-left", {
-                "text-red-500": errors.author,
-              })}
+              className={cn(errors.author && "text-red-500")}
             >
               {errors.author ? errors.author.message : "Author"}
             </Label>
             <Input
               placeholder="Gordon Ramsay"
               id="author"
-              className={cn({
-                "border-red-600 bg-red-200 placeholder:text-slate-600":
-                  errors.author,
-              })}
+              className={cn(
+                errors.author &&
+                  "border-red-600 bg-red-200 placeholder:text-slate-600",
+              )}
               {...register("author", {
                 required: {
                   value: true,
