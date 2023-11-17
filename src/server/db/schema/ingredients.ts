@@ -14,9 +14,8 @@ export const ingredientsToRecipes = pgTable("ingredients_to_recipes", {
     .notNull()
     .defaultRandom()
     .references(() => ingredients.id),
-  recipeId: uuid("recipe_id")
+  recipeId: text("recipe_id")
     .notNull()
-    .defaultRandom()
     .references(() => recipes.id),
 });
 

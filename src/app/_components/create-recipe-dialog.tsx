@@ -1,12 +1,18 @@
 "use client";
 
-import * as React from "react";
-import { X, Plus } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { api } from "~/trpc/react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { Button } from "./ui/button";
-import { cn } from "../../lib/utils";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import type {
+  FieldError,
+  FieldErrorsImpl,
+  Merge,
+  SubmitHandler,
+} from "react-hook-form";
+import { useState, useRef } from "react";
+import type { FC } from "react";
 
 import {
   Dialog,
@@ -26,33 +32,44 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "./ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { ScrollArea } from "./ui/scroll-area";
+
+import { Popover, PopoverTrigger } from "./ui/popover";
 import type { RouterOutputs } from "~/server/api/root";
+import { IngredientsComboboxContent } from "./ingredients-combobox-content";
+import { cn } from "~/lib/utils";
 
-type Ingredients = RouterOutputs["ingredients"]["getIngredients"];
+type TIngredients = RouterOutputs["ingredients"]["getIngredients"];
 
-const IngredientsCombobox = () => {
-  const [open, setOpen] = React.useState(false);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const [newIngredientTitle, setNewIngredientTitle] = React.useState("");
-  const [selectedIngredients, setSelectedIngredients] =
-    React.useState<Ingredients>([]);
+type FormValues = {
+  name: string;
+  categoryId: string;
+  slug: string;
+  description: string;
+  author: string;
+  ingredients: TIngredients;
+};
 
-  const selectedIngredientsIds = selectedIngredients.map(
-    (ingredient) => ingredient.id,
-  );
+type IngredientError = Merge<
+  FieldError,
+  (Merge<FieldError, FieldErrorsImpl<TIngredients[number]>> | undefined)[]
+>;
+
+const IngredientsCombobox: FC<{
+  selectedIngredients: TIngredients;
+  onSelect: (events: TIngredients) => void;
+  error?: IngredientError;
+}> = ({ selectedIngredients, onSelect, error }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [newIngredientTitle, setNewIngredientTitle] = useState("");
 
   const utils = api.useUtils();
 
-  const { data: ingredients } = api.ingredients.getIngredients.useQuery();
+  const {
+    data: ingredients,
+    isLoading,
+    isFetching,
+  } = api.ingredients.getIngredients.useQuery();
   const { mutate: onMutateIngredients } =
     api.ingredients.addIngredient.useMutation({
       onSuccess: () => {
@@ -60,12 +77,14 @@ const IngredientsCombobox = () => {
       },
     });
 
-  const handleDeleteIngredient = (ingredient: Ingredients[number]) => {
-    setSelectedIngredients((prevSelectedIngredients) =>
-      prevSelectedIngredients.filter(
-        (selectedIngredient) => selectedIngredient.id !== ingredient.id,
-      ),
+  const isIngredientsLoading = isLoading || isFetching;
+
+  const handleDeleteIngredient = (ingredient: TIngredients[number]) => {
+    const filteredIngredients = selectedIngredients.filter(
+      (selectedIngredient) => selectedIngredient.id !== ingredient.id,
     );
+
+    onSelect(filteredIngredients);
   };
 
   const handleAddIngredient = () => {
@@ -73,84 +92,46 @@ const IngredientsCombobox = () => {
     setNewIngredientTitle("");
   };
 
+  const handleSearchIngredient = (searchedIngredient: string) =>
+    setNewIngredientTitle(searchedIngredient);
+
+  const checkIsSelected = (id: string) => {
+    return selectedIngredients.some(
+      (selectedIngredient) => selectedIngredient.id === id,
+    );
+  };
+
   return (
-    <div ref={containerRef} className="col-start-2 col-end-5">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild className="mb-2">
+    <div ref={containerRef}>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between"
+            aria-expanded={isOpen}
+            className={cn(
+              "w-full justify-between font-normal hover:bg-white",
+              error &&
+                "border-red-600 bg-red-200 placeholder:text-slate-600 hover:bg-red-200",
+            )}
           >
             Select Ingredients
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent
-          className="w-[var(--radix-popover-trigger-width)] p-0"
+        <IngredientsComboboxContent
+          ingredients={ingredients}
+          selectedIngredients={selectedIngredients}
+          onAdd={handleAddIngredient}
+          isSelected={checkIsSelected}
+          onSearch={handleSearchIngredient}
+          searchedIngredient={newIngredientTitle}
+          onSelectIngredients={onSelect}
           container={containerRef.current}
-        >
-          <Command>
-            <ScrollArea className="h-60">
-              <CommandInput
-                name="ingredients"
-                placeholder="Search ingredient"
-                value={newIngredientTitle}
-                onValueChange={(searchedIngredient) =>
-                  setNewIngredientTitle(searchedIngredient)
-                }
-              />
-              <CommandEmpty className="text-left">
-                <div className="px-4 py-2 text-xs font-medium text-slate-400">
-                  No ingredients found
-                </div>
-                <button
-                  className="flex w-full items-center gap-4 bg-slate-100 px-4 py-2 text-left font-medium text-slate-400"
-                  onClick={handleAddIngredient}
-                >
-                  <div>
-                    <Plus className="h-4 w-4 text-slate-400" />
-                  </div>
-                  New Ingredient
-                  <div className="text-slate-500">{newIngredientTitle}</div>
-                </button>
-              </CommandEmpty>
-              <CommandGroup>
-                {ingredients?.map((ingredient) => (
-                  <CommandItem
-                    key={ingredient.id}
-                    value={ingredient.title}
-                    onSelect={() => {
-                      setSelectedIngredients((prevIngredients) => {
-                        if (selectedIngredientsIds.includes(ingredient.id)) {
-                          return prevIngredients.filter(
-                            (prevIngredient) =>
-                              prevIngredient.id !== ingredient.id,
-                          );
-                        }
-
-                        return [...prevIngredients, ingredient];
-                      });
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        selectedIngredientsIds.includes(ingredient.id)
-                          ? "opacity-100"
-                          : "opacity-0",
-                      )}
-                    />
-                    {ingredient.title}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </ScrollArea>
-          </Command>
-        </PopoverContent>
+          isLoading={isIngredientsLoading}
+        />
       </Popover>
-      <div className="flex flex-wrap gap-4">
+      <div className="mt-2 flex flex-wrap gap-4">
         {selectedIngredients.slice(0, 2).map((ingredient) => (
           <div
             key={ingredient.id}
@@ -177,82 +158,234 @@ const IngredientsCombobox = () => {
 };
 
 export const CreateRecipeDialog = () => {
-  const { data: categories } = api.categories.getCategories.useQuery();
-  const { handleSubmit, register } = useForm();
+  const {
+    data: categories,
+    isLoading,
+    isFetching,
+  } = api.categories.getCategories.useQuery();
+  const [isOpen, setIsOpen] = useState(false);
+  const utils = api.useUtils();
+  const {
+    handleSubmit,
+    register,
+    watch,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<FormValues>();
+  const isCategoriesLoading = isLoading || isFetching;
+  const { mutate: onMutateRecipes } = api.recipes.addRecipe.useMutation({
+    onSuccess: () => {
+      void utils.recipes.getAllRecipes.invalidate();
+    },
+  });
+
+  const recipeName = watch("name") || "";
+  const createSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+  };
+
+  const handleCloseDialog = (isOpen: boolean) => {
+    setIsOpen(isOpen);
+    reset();
+  };
+
+  const onAddRecipe: SubmitHandler<FormValues> = (data) => {
+    const newRecipe = {
+      ...data,
+      slug: createSlug(recipeName),
+      ingredientsIds: data.ingredients.map((ingredient) => ingredient.id),
+    };
+
+    onMutateRecipes(newRecipe);
+    setIsOpen(false);
+    reset();
+  };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleCloseDialog}>
       <DialogTrigger asChild>
         <Button className="bg-white text-black duration-300 hover:bg-slate-800 hover:text-white">
           Add New Recipe
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Recipe</DialogTitle>
         </DialogHeader>
         <form
           id="addRecipeForm"
-          className="grid gap-4 py-4"
-          onSubmit={handleSubmit((data) => console.log(data))}
+          className="grid grid-cols-2 gap-6 py-4"
+          onSubmit={handleSubmit(onAddRecipe)}
         >
-          <div className="grid grid-cols-4 gap-4">
-            <Label htmlFor="name" className="text-left">
-              Name
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="name"
+              className={cn("text-left", {
+                "text-red-500": errors.name,
+              })}
+            >
+              {errors.name ? errors.name.message : "Name"}
             </Label>
             <Input
               id="name"
               placeholder="Pizza"
-              className="col-span-3"
-              {...register("name")}
+              className={cn({
+                "border-red-600 bg-red-200 placeholder:text-slate-600":
+                  errors.name,
+              })}
+              {...register("name", {
+                required: {
+                  value: true,
+                  message: "Name is required",
+                },
+                minLength: {
+                  value: 5,
+                  message: "Should contain at least 5 chars",
+                },
+              })}
             />
           </div>
-          <div className="grid grid-cols-4 gap-4">
-            <Label htmlFor="category" className="text-left">
-              Category
-            </Label>
-            <Select>
-              <SelectTrigger
-                className="col-start-2 col-end-5 w-full"
-                id="category"
-              >
-                <SelectValue placeholder="Select Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories?.map((category) => (
-                  <SelectItem key={category.id} value={category.title}>
-                    {category.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="Slug">Slug</Label>
+            <Input
+              id="slug"
+              placeholder="Slug"
+              disabled
+              {...register("slug")}
+              value={createSlug(recipeName)}
+            />
           </div>
-          <div className="grid grid-cols-4 gap-4">
-            <Label htmlFor="description" className="text-left">
-              Description
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="category"
+              className={cn({
+                "text-red-500": errors.categoryId,
+              })}
+            >
+              {errors.categoryId ? errors.categoryId.message : "Category"}
+            </Label>
+            <Controller
+              control={control}
+              name="categoryId"
+              rules={{
+                required: {
+                  value: true,
+                  message: "Category is required",
+                },
+              }}
+              render={({ field: { onChange } }) => (
+                <Select onValueChange={onChange}>
+                  <SelectTrigger
+                    id="categoryId"
+                    className={cn({
+                      "border-red-600 bg-red-200 placeholder:text-slate-600":
+                        errors.categoryId,
+                    })}
+                  >
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {isCategoriesLoading ? (
+                      <Loader2 className="m-auto animate-spin" />
+                    ) : (
+                      <>
+                        {categories?.map((category) => (
+                          <SelectItem
+                            key={category.id}
+                            value={category.id}
+                            className="cursor-pointer"
+                          >
+                            {category.title}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="description"
+              className={cn({
+                "text-red-500": errors.description,
+              })}
+            >
+              {errors.description ? errors.description.message : "Description"}
             </Label>
             <Textarea
               id="description"
-              className="col-start-2 col-end-5 w-full resize-none"
-              {...register("description")}
+              className={cn({
+                "border-red-600 bg-red-200 placeholder:text-slate-600":
+                  errors.description,
+              })}
+              {...register("description", {
+                required: {
+                  value: true,
+                  message: "Description is required",
+                },
+                minLength: {
+                  value: 20,
+                  message: "Should contain at least 20 chars",
+                },
+              })}
             />
           </div>
-          <div className="mt grid grid-cols-4 gap-4">
-            <Label htmlFor="ingredients" className="text-left">
-              Ingredients
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="ingredients"
+              className={cn({
+                "text-red-500": errors.ingredients,
+              })}
+            >
+              {errors.ingredients ? errors.ingredients.message : "Ingredients"}
             </Label>
-            <IngredientsCombobox />
+            <Controller
+              control={control}
+              name="ingredients"
+              rules={{
+                required: { value: true, message: "Ingredients are required" },
+              }}
+              render={({ field: { onChange, value } }) => (
+                <IngredientsCombobox
+                  selectedIngredients={value || []}
+                  onSelect={onChange}
+                  error={errors.ingredients}
+                />
+              )}
+            />
           </div>
-
-          <div className="grid grid-cols-4 gap-4">
-            <Label htmlFor="author" className="text-left">
-              Author
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="author"
+              className={cn("text-left", {
+                "text-red-500": errors.author,
+              })}
+            >
+              {errors.author ? errors.author.message : "Author"}
             </Label>
             <Input
               placeholder="Gordon Ramsay"
               id="author"
-              className="col-span-3"
-              {...register("author")}
+              className={cn({
+                "border-red-600 bg-red-200 placeholder:text-slate-600":
+                  errors.author,
+              })}
+              {...register("author", {
+                required: {
+                  value: true,
+                  message: "Author is required",
+                },
+                minLength: {
+                  value: 5,
+                  message: "Should contain at least 5 chars",
+                },
+              })}
             />
           </div>
         </form>

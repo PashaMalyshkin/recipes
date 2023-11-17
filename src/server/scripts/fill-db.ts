@@ -1,9 +1,9 @@
-import { INGREDIENTS } from "../../constants/ingredients";
 import { db } from "../db/schema/index";
-import { ingredients } from "../db/schema/ingredients";
+import { RECIPES } from "../../constants/recipes";
+import { recipes } from "../db/schema/recipes";
 
 const fillDb = async () => {
-  await db.insert(ingredients).values(INGREDIENTS);
+  // await db.insert(recipes).values(RECIPES);
 };
 
 void fillDb();

@@ -22,7 +22,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`font-sans ${inter.variable} bg-stone-950 px-6`}>
+      <body
+        className={`font-sans ${inter.variable} h-screen bg-stone-950 px-6`}
+      >
         <TRPCReactProvider cookies={cookies().toString()}>
           <Header />
           {children}
