@@ -1,7 +1,7 @@
 import type { RouterOutputs } from "~/server/api/root";
 
 type IngredientsForRecipe =
-  RouterOutputs["recipes"]["getAllRecipes"][number]["ingredientsToRecipes"];
+  RouterOutputs["recipes"]["getRecipes"][number]["ingredientsToRecipes"];
 
 export const IngredientsList: React.FC<{
   ingredients: IngredientsForRecipe;

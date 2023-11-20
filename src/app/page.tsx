@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <main className="py-6">
       <Suspense fallback={<RecipesListSkeleton />}>
-        <RecipesList />
+        <RecipesList limit={5} />
       </Suspense>
     </main>
   );
