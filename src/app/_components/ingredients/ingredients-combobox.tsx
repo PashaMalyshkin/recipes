@@ -1,7 +1,7 @@
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Popover, PopoverTrigger } from "../ui/popover";
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { api } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { SelectedIngredientList } from "./selected-ingredients-list";
@@ -39,14 +39,6 @@ export const IngredientsCombobox: FC<{
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const {
-    data: ingredients,
-    isLoading,
-    isFetching,
-  } = api.ingredients.getIngredients.useQuery();
-
-  const isIngredientsLoading = isLoading || isFetching;
-
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor="ingredients" className={cn(error && "text-red-500")}>
@@ -82,10 +74,8 @@ export const IngredientsCombobox: FC<{
                 container={containerRef.current}
               >
                 <IngredientsComboboxContent
-                  ingredients={ingredients}
                   selectedIngredients={value}
                   onSelectIngredients={onChange}
-                  isLoading={isIngredientsLoading}
                 />
               </PopoverContent>
             </Popover>
@@ -99,11 +89,9 @@ export const IngredientsCombobox: FC<{
 };
 
 export const IngredientsComboboxContent: FC<{
-  ingredients?: TIngredients;
   selectedIngredients: TIngredients;
-  isLoading: boolean;
   onSelectIngredients: (events: TIngredients) => void;
-}> = ({ ingredients, selectedIngredients, onSelectIngredients, isLoading }) => {
+}> = ({ selectedIngredients, onSelectIngredients }) => {
   const [newIngredientTitle, setNewIngredientTitle] = useState("");
   const utils = api.useUtils();
 
@@ -111,6 +99,10 @@ export const IngredientsComboboxContent: FC<{
     onMutateIngredients({ title: newIngredientTitle });
     setNewIngredientTitle("");
   };
+
+  const [ingredients, { isLoading, isFetching }] =
+    api.ingredients.getIngredients.useSuspenseQuery();
+  const isIngredientsLoading = isLoading || isFetching;
 
   const { mutate: onMutateIngredients } =
     api.ingredients.addIngredient.useMutation({
@@ -132,8 +124,9 @@ export const IngredientsComboboxContent: FC<{
         placeholder="Search ingredient"
         value={newIngredientTitle}
         onValueChange={setNewIngredientTitle}
+        isLoading={isIngredientsLoading}
       />
-      {!isLoading && (
+      <Suspense fallback={<Loader2 className="m-auto animate-spin" />}>
         <CommandEmpty className="w-[calc(var(--radix-popover-trigger-width)-30px)] truncate">
           <div className="px-4 py-2 text-xs font-medium text-slate-400">
             No ingredients found
@@ -154,12 +147,8 @@ export const IngredientsComboboxContent: FC<{
             </div>
           </button>
         </CommandEmpty>
-      )}
 
-      <CommandGroup>
-        {isLoading ? (
-          <Loader2 className="m-auto animate-spin" />
-        ) : (
+        <CommandGroup>
           <ScrollArea className="h-40">
             {ingredients?.map((ingredient) => (
               <CommandItem
@@ -190,8 +179,8 @@ export const IngredientsComboboxContent: FC<{
               </CommandItem>
             ))}
           </ScrollArea>
-        )}
-      </CommandGroup>
+        </CommandGroup>
+      </Suspense>
     </Command>
   );
 };
