@@ -15,7 +15,7 @@ export const RecipeCard: React.FC<{
     <li className="cursor-pointer duration-300 hover:scale-105">
       <Card className="h-full min-h-[300px]">
         <CardHeader>
-          <CardTitle className="truncate" title={recipe.title}>
+          <CardTitle className="truncate leading-8" title={recipe.title}>
             {recipe.title}
           </CardTitle>
           <CardDescription className="truncate" title={recipe.description}>

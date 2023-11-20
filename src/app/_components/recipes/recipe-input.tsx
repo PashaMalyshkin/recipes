@@ -14,7 +14,20 @@ export const RecipeInput: FC<
     error?: FieldError;
     register: UseFormRegister<FormValues>;
   }
-> = ({ error, label, register, fieldName, ...props }) => {
+> = ({ error, label, register, fieldName, required = true, ...props }) => {
+  const validationRules = required
+    ? {
+        required: {
+          value: true,
+          message: `${label} is required`,
+        },
+        minLength: {
+          value: 5,
+          message: "Should contain at least 5 chars",
+        },
+      }
+    : undefined;
+
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor="author" className={cn(error && "text-red-500")}>
@@ -25,16 +38,7 @@ export const RecipeInput: FC<
         className={cn(
           error && "border-red-600 bg-red-200 placeholder:text-slate-600",
         )}
-        {...register(fieldName, {
-          required: {
-            value: true,
-            message: `${label} is required`,
-          },
-          minLength: {
-            value: 5,
-            message: "Should contain at least 5 chars",
-          },
-        })}
+        {...register(fieldName, validationRules)}
       />
     </div>
   );

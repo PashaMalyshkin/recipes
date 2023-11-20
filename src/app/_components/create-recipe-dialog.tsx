@@ -2,7 +2,7 @@
 
 import { api } from "~/trpc/react";
 import { Button } from "./ui/button";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import { useState } from "react";
 
@@ -14,8 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { Label } from "./ui/label";
-import { cn } from "~/lib/utils";
 import { IngredientsCombobox } from "./ingredients/ingredients-combobox";
 import type { FormValues } from "~/shared/types/form-values";
 import { RecipeInput } from "./recipes/recipe-input";
@@ -71,13 +69,13 @@ export const CreateRecipeDialog = () => {
           Add New Recipe
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="h-[558px]">
         <DialogHeader>
           <DialogTitle>Add Recipe</DialogTitle>
         </DialogHeader>
         <form
           id="addRecipeForm"
-          className="grid grid-cols-2 gap-6 py-4"
+          className="grid h-[418px] grid-cols-2 grid-rows-[120px_minmax(100px,_1fr)_100px] gap-4 py-4"
           onSubmit={handleSubmit(onAddRecipe)}
         >
           <RecipeInput
@@ -94,6 +92,7 @@ export const CreateRecipeDialog = () => {
             fieldName="slug"
             register={register}
             disabled
+            required={false}
             value={createSlug(recipeName)}
           />
 
@@ -106,28 +105,9 @@ export const CreateRecipeDialog = () => {
             label="Description"
             fieldName="description"
           />
-          <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="ingredients"
-              className={cn(errors.ingredients && "text-red-500")}
-            >
-              {errors.ingredients ? errors.ingredients.message : "Ingredients"}
-            </Label>
-            <Controller
-              control={control}
-              name="ingredients"
-              rules={{
-                required: { value: true, message: "Ingredients are required" },
-              }}
-              render={({ field: { onChange, value = [] } }) => (
-                <IngredientsCombobox
-                  selectedIngredients={value}
-                  onSelect={onChange}
-                  error={errors.ingredients}
-                />
-              )}
-            />
-          </div>
+
+          <IngredientsCombobox error={errors.ingredients} control={control} />
+
           <RecipeInput
             placeholder="Gordon Ramsay"
             label="Author"
