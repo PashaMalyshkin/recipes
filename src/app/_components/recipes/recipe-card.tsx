@@ -5,8 +5,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { IngredientsList } from "./ingredients-list";
+} from "../ui/card";
+import { IngredientsList } from "../ingredients/card-ingredients-list";
 
 export const RecipeCard: React.FC<{
   recipe: RouterOutputs["recipes"]["getAllRecipes"][number];
@@ -15,11 +15,17 @@ export const RecipeCard: React.FC<{
     <li className="cursor-pointer duration-300 hover:scale-105">
       <Card className="h-full min-h-[300px]">
         <CardHeader>
-          <CardTitle>{recipe.title}</CardTitle>
-          <CardDescription>{recipe.description}</CardDescription>
+          <CardTitle className="truncate leading-8" title={recipe.title}>
+            {recipe.title}
+          </CardTitle>
+          <CardDescription className="truncate" title={recipe.description}>
+            {recipe.description}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <IngredientsList ingredients={recipe.ingredientsToRecipes} />
+          {recipe.ingredientsToRecipes.length > 0 && (
+            <IngredientsList ingredients={recipe.ingredientsToRecipes} />
+          )}
         </CardContent>
       </Card>
     </li>

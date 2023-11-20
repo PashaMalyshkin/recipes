@@ -5,7 +5,7 @@ import { recipes } from "./recipes";
 export const ingredients = pgTable("ingredients", {
   id: uuid("id").primaryKey().defaultRandom(),
   createdAt: timestamp("createdAt").defaultNow(),
-  title: text("title").notNull(),
+  title: text("title").unique().notNull(),
 });
 
 export const ingredientsToRecipes = pgTable("ingredients_to_recipes", {
@@ -14,9 +14,8 @@ export const ingredientsToRecipes = pgTable("ingredients_to_recipes", {
     .notNull()
     .defaultRandom()
     .references(() => ingredients.id),
-  recipeId: uuid("recipe_id")
+  recipeId: text("recipe_id")
     .notNull()
-    .defaultRandom()
     .references(() => recipes.id),
 });
 
