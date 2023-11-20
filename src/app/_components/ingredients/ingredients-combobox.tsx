@@ -174,7 +174,7 @@ export const IngredientsComboboxContent: FC<{
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    isSelected(ingredient.id) ? "opacity-100" : "opacity-0",
+                    isSelected(ingredient.title) ? "opacity-100" : "opacity-0",
                   )}
                 />
                 {ingredient.title}

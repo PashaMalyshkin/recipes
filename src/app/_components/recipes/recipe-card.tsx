@@ -9,7 +9,7 @@ import {
 import { IngredientsList } from "../ingredients/card-ingredients-list";
 
 export const RecipeCard: React.FC<{
-  recipe: RouterOutputs["recipes"]["getAllRecipes"][number];
+  recipe: RouterOutputs["recipes"]["getLastRecipes"][number];
 }> = ({ recipe }) => {
   return (
     <li className="cursor-pointer duration-300 hover:scale-105">

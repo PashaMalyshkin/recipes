@@ -70,6 +70,7 @@ export const CreateRecipeDialog = () => {
   const { mutate: onMutateRecipes } = api.recipes.addRecipe.useMutation({
     onSuccess: async () => {
       await utils.recipes.getAllRecipes.invalidate();
+      await utils.recipes.getLastRecipes.invalidate();
     },
   });
 

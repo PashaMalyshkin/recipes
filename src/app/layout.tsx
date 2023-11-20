@@ -13,7 +13,8 @@ const inter = Inter({
 
 export const metadata = {
   title: "Recipes",
-  description: "",
+  description:
+    "It's the main page of Recipes App where you can browse five last existing recipes and add your own!",
 };
 
 export default function RootLayout({

@@ -6,7 +6,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 
 export const recipes = createTRPCRouter({
-  getAllRecipes: publicProcedure.query(async ({ ctx }) => {
+  getLastRecipes: publicProcedure.query(async ({ ctx }) => {
     const recipesResponse = await ctx.db.query.recipes.findMany({
       orderBy: desc(recipesSchema.createdAt),
       limit: 5,
@@ -21,7 +21,20 @@ export const recipes = createTRPCRouter({
 
     return recipesResponse;
   }),
+  getAllRecipes: publicProcedure.query(async ({ ctx }) => {
+    const recipesResponse = await ctx.db.query.recipes.findMany({
+      orderBy: desc(recipesSchema.createdAt),
+      with: {
+        ingredientsToRecipes: {
+          with: {
+            ingredient: true,
+          },
+        },
+      },
+    });
 
+    return recipesResponse;
+  }),
   addRecipe: publicProcedure
     .input(
       z.object({
