@@ -1,10 +1,7 @@
-import { ChevronsUpDown } from "lucide-react";
-import { Button } from "../ui/button";
-import { Popover, PopoverTrigger } from "../ui/popover";
+import type { FC } from "react";
 import { Suspense, useRef, useState } from "react";
 import { api } from "~/trpc/react";
 import { cn } from "~/lib/utils";
-import { SelectedIngredientList } from "./selected-ingredients-list";
 import {
   Command,
   CommandEmpty,
@@ -12,11 +9,12 @@ import {
   CommandInput,
   CommandItem,
 } from "../ui/command";
-import { Check, Loader2, Plus } from "lucide-react";
+import { Label } from "../ui/label";
 import { ScrollArea } from "../ui/scroll-area";
 import { PopoverContent } from "../ui/popover";
-import type { FC } from "react";
-import type { TIngredients } from "~/shared/types/ingredients";
+import { Button } from "../ui/button";
+import { Popover, PopoverTrigger } from "../ui/popover";
+import { Check, Loader2, Plus, X, ChevronsUpDown } from "lucide-react";
 import {
   Controller,
   type Control,
@@ -25,7 +23,8 @@ import {
   type Merge,
 } from "react-hook-form";
 import type { FormValues } from "~/shared/types/form-values";
-import { Label } from "../ui/label";
+import type { TIngredients } from "~/shared/types/ingredients";
+import { toast } from "sonner";
 
 type IngredientError = Merge<
   FieldError,
@@ -106,14 +105,17 @@ export const IngredientsComboboxContent: FC<{
 
   const { mutate: onMutateIngredients } =
     api.ingredients.addIngredient.useMutation({
-      onSuccess: () => {
-        void utils.ingredients.getIngredients.invalidate();
+      onSuccess: async () => {
+        await utils.ingredients.getIngredients.invalidate();
+      },
+      onError: ({ message }) => {
+        toast.error(message);
       },
     });
 
-  const isSelected = (id: string) => {
+  const isSelected = (title: string) => {
     return selectedIngredients.some(
-      (selectedIngredient) => selectedIngredient.id === id,
+      (selectedIngredient) => selectedIngredient.title === title,
     );
   };
 
@@ -155,14 +157,14 @@ export const IngredientsComboboxContent: FC<{
                 title={ingredient.title}
                 className="w-[calc(var(--radix-popover-trigger-width)-30px)] cursor-pointer truncate"
                 key={ingredient.id}
-                value={ingredient.id}
-                onSelect={(selectedIngredientId) => {
-                  const filteredIngredients = selectedIngredients.filter(
-                    (currentIngredient) =>
-                      currentIngredient.id !== ingredient.id,
-                  );
+                value={ingredient.title}
+                onSelect={(selectedIngredientTitle) => {
+                  if (isSelected(selectedIngredientTitle)) {
+                    const filteredIngredients = selectedIngredients.filter(
+                      (currentIngredient) =>
+                        currentIngredient.title !== selectedIngredientTitle,
+                    );
 
-                  if (isSelected(selectedIngredientId)) {
                     return onSelectIngredients(filteredIngredients);
                   }
 
@@ -182,5 +184,44 @@ export const IngredientsComboboxContent: FC<{
         </CommandGroup>
       </Suspense>
     </Command>
+  );
+};
+
+export const SelectedIngredientList: FC<{
+  ingredients: TIngredients;
+  onSelect: (ingredients: TIngredients) => void;
+}> = ({ ingredients, onSelect }) => {
+  const handleDelete = (id: string) => {
+    const filteredIngredients = ingredients.filter(
+      (ingredient) => ingredient.id !== id,
+    );
+
+    onSelect(filteredIngredients);
+  };
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-4">
+      {ingredients.slice(0, 2).map((ingredient) => (
+        <div
+          key={ingredient.id}
+          className="flex h-6 w-32 items-center justify-between gap-2 rounded-full bg-slate-100 px-2"
+        >
+          <div className="truncate">{ingredient.title}</div>
+          <button
+            type="button"
+            className="h-fit w-fit p-0"
+            onClick={() => handleDelete(ingredient.id)}
+          >
+            <X className="mt-[2px] h-4 w-4 text-slate-500" />
+          </button>
+        </div>
+      ))}
+
+      {ingredients.length > 2 && (
+        <div className="flex h-6 items-center gap-2 rounded-full bg-slate-100 px-2">
+          <div>{`+${ingredients.length - 2} more`}</div>
+        </div>
+      )}
+    </div>
   );
 };

@@ -7,12 +7,14 @@ import { Loader2 } from "lucide-react";
 export const RecipesList = () => {
   const [recipes, { isFetching }] =
     api.recipes.getAllRecipes.useSuspenseQuery();
+
   return (
     <>
+      <div className="h-8 w-8">
+        {isFetching && <Loader2 className="m-auto animate-spin text-white" />}
+      </div>
       {!recipes.length && <NoRecipes />}
-      {isFetching ? (
-        <Loader2 className="m-auto mt-24 animate-spin text-white" />
-      ) : (
+      {recipes.length > 0 && (
         <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           {recipes.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />

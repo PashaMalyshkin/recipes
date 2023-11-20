@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { ingredients as ingredientsSchema } from "~/server/db/schema/ingredients";
 import { desc } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 export const ingredients = createTRPCRouter({
   getIngredients: publicProcedure.query(async ({ ctx }) => {
@@ -18,6 +19,15 @@ export const ingredients = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.insert(ingredientsSchema).values({ title: input.title });
+      const ingredient = await ctx.db
+        .insert(ingredientsSchema)
+        .values({ title: input.title });
+
+      if (!ingredient) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Ingredient with this title already exist",
+        });
+      }
     }),
 });

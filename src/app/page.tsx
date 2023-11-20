@@ -4,7 +4,7 @@ import { RecipesList } from "./_components/recipes/recipes-list";
 
 export default function Home() {
   return (
-    <main className="py-4">
+    <main className="py-6">
       <Suspense fallback={<RecipesListSkeleton />}>
         <RecipesList />
       </Suspense>

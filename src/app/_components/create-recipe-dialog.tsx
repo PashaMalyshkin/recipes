@@ -20,6 +20,42 @@ import { RecipeInput } from "./recipes/recipe-input";
 import { RecipeTextarea } from "./recipes/recipe-textarea";
 import { SelectCategory } from "./select-category";
 
+export const validationRules = {
+  name: {
+    required: "Name is required",
+    minLength: {
+      value: 5,
+      message: "Should contain at least 5 chars",
+    },
+    pattern: {
+      value: /^[^\u0400-\u04FF]*$/,
+      message: "Do NOT use Cyrillic chars",
+    },
+  },
+  description: {
+    required: "Description is required",
+    minLength: {
+      value: 20,
+      message: "Should contain at least 20 chars",
+    },
+    pattern: {
+      value: /^[^\u0400-\u04FF]*$/,
+      message: "Do NOT use Cyrillic chars",
+    },
+  },
+  author: {
+    required: "Author is required",
+    minLength: {
+      value: 5,
+      message: "Should contain at least 5 chars",
+    },
+    pattern: {
+      value: /^[^\u0400-\u04FF]*$/,
+      message: "Do NOT use Cyrillic chars",
+    },
+  },
+};
+
 export const CreateRecipeDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
   const utils = api.useUtils();
@@ -32,8 +68,8 @@ export const CreateRecipeDialog = () => {
     formState: { errors },
   } = useForm<FormValues>();
   const { mutate: onMutateRecipes } = api.recipes.addRecipe.useMutation({
-    onSuccess: () => {
-      void utils.recipes.getAllRecipes.invalidate();
+    onSuccess: async () => {
+      await utils.recipes.getAllRecipes.invalidate();
     },
   });
 
@@ -83,6 +119,7 @@ export const CreateRecipeDialog = () => {
             label="Name"
             fieldName="name"
             error={errors.name}
+            rules={validationRules.name}
             register={register}
           />
 
@@ -104,6 +141,7 @@ export const CreateRecipeDialog = () => {
             register={register}
             label="Description"
             fieldName="description"
+            rules={validationRules.description}
           />
 
           <IngredientsCombobox error={errors.ingredients} control={control} />
@@ -113,6 +151,7 @@ export const CreateRecipeDialog = () => {
             label="Author"
             fieldName="author"
             register={register}
+            rules={validationRules.author}
             error={errors.author}
           />
         </form>
