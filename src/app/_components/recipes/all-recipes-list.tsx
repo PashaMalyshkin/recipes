@@ -4,10 +4,9 @@ import { api } from "~/trpc/react";
 import { RecipeCard } from "./recipe-card";
 import { NoRecipes } from "./no-recipes";
 import { Loader2 } from "lucide-react";
-export const RecipesList = ({ limit }: { limit?: number }) => {
-  const [recipes, { isFetching }] = api.recipes.getRecipes.useSuspenseQuery({
-    limit,
-  });
+export const AllRecipesList = () => {
+  const [recipes, { isFetching }] =
+    api.recipes.getAllRecipes.useSuspenseQuery();
 
   return (
     <>

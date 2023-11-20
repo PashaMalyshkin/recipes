@@ -69,7 +69,8 @@ export const CreateRecipeDialog = () => {
   } = useForm<FormValues>();
   const { mutate: onMutateRecipes } = api.recipes.addRecipe.useMutation({
     onSuccess: async () => {
-      await utils.recipes.getRecipes.invalidate();
+      await utils.recipes.getAllRecipes.invalidate();
+      await utils.recipes.getLastRecipes.invalidate();
     },
   });
 
