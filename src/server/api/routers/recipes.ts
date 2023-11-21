@@ -45,35 +45,33 @@ export const recipes = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return await ctx.db.transaction(async (tx) => {
-        const recipeResponse = await tx.query.recipes.findFirst({
-          where: (recipes, { eq }) => eq(recipes.id, input.id),
-          with: {
-            ingredientsToRecipes: {
-              with: {
-                ingredient: true,
-              },
+      const recipeResponse = await ctx.db.query.recipes.findFirst({
+        where: (recipes, { eq }) => eq(recipes.id, input.id),
+        with: {
+          ingredientsToRecipes: {
+            with: {
+              ingredient: true,
             },
           },
-          columns: { createdAt: false },
-        });
-
-        if (!recipeResponse) {
-          return null;
-        }
-
-        const categoryResponse = await tx.query.categories.findFirst({
-          where: (categories, { eq }) =>
-            eq(categories.id, recipeResponse.categoryId),
-          columns: { createdAt: false },
-        });
-
-        if (!categoryResponse) {
-          return null;
-        }
-
-        return { ...recipeResponse, categoryTitle: categoryResponse.title };
+        },
+        columns: { createdAt: false },
       });
+
+      if (!recipeResponse) {
+        return null;
+      }
+
+      const categoryResponse = await ctx.db.query.categories.findFirst({
+        where: (categories, { eq }) =>
+          eq(categories.id, recipeResponse.categoryId),
+        columns: { createdAt: false },
+      });
+
+      if (!categoryResponse) {
+        return null;
+      }
+
+      return { ...recipeResponse, categoryTitle: categoryResponse.title };
     }),
   addRecipe: publicProcedure
     .input(
