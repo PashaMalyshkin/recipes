@@ -27,6 +27,10 @@ export const validationRules = {
       value: 5,
       message: "Should contain at least 5 chars",
     },
+    maxLength: {
+      value: 30,
+      message: "Should contain max 30 chars",
+    },
     pattern: {
       value: /^[^\u0400-\u04FF]*$/,
       message: "Do NOT use Cyrillic chars",
@@ -48,6 +52,10 @@ export const validationRules = {
     minLength: {
       value: 5,
       message: "Should contain at least 5 chars",
+    },
+    maxLength: {
+      value: 30,
+      message: "Should contain max 30 chars",
     },
     pattern: {
       value: /^[^\u0400-\u04FF]*$/,

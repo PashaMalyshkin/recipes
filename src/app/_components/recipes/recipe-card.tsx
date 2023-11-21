@@ -7,12 +7,22 @@ import {
   CardTitle,
 } from "../ui/card";
 import { IngredientsList } from "../ingredients/card-ingredients-list";
+import { useRouter } from "next/navigation";
 
 export const RecipeCard: React.FC<{
   recipe: RouterOutputs["recipes"]["getLastRecipes"][number];
 }> = ({ recipe }) => {
+  const router = useRouter();
+
+  const handleNavigate = () => {
+    router.push(`/recipes/${recipe.id}`);
+  };
+
   return (
-    <li className="cursor-pointer duration-300 hover:scale-105">
+    <li
+      className="cursor-pointer duration-300 hover:scale-105"
+      onClick={handleNavigate}
+    >
       <Card className="h-full min-h-[300px]">
         <CardHeader>
           <CardTitle className="truncate leading-8" title={recipe.title}>

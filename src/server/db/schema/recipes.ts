@@ -9,9 +9,11 @@ export const recipes = pgTable("recipes", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   author: text("author").notNull(),
-  categoryId: uuid("category_id").references(() => categories.id, {
-    onDelete: "cascade",
-  }),
+  categoryId: uuid("category_id")
+    .notNull()
+    .references(() => categories.id, {
+      onDelete: "cascade",
+    }),
 });
 
 export const recipesRelations = relations(recipes, ({ one, many }) => ({

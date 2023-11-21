@@ -4,6 +4,7 @@ import { recipes as recipesSchema } from "~/server/db/schema/recipes";
 import { ingredientsToRecipes } from "~/server/db/schema/ingredients";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { capitalize } from "~/shared/utils/capitalize";
 
 export const recipes = createTRPCRouter({
   getLastRecipes: publicProcedure.query(async ({ ctx }) => {
@@ -17,6 +18,7 @@ export const recipes = createTRPCRouter({
           },
         },
       },
+      columns: { createdAt: false },
     });
 
     return recipesResponse;
@@ -31,10 +33,46 @@ export const recipes = createTRPCRouter({
           },
         },
       },
+      columns: { createdAt: false },
     });
 
     return recipesResponse;
   }),
+  getRecipeById: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const recipeResponse = await ctx.db.query.recipes.findFirst({
+        where: (recipes, { eq }) => eq(recipes.id, input.id),
+        with: {
+          ingredientsToRecipes: {
+            with: {
+              ingredient: true,
+            },
+          },
+        },
+        columns: { createdAt: false },
+      });
+
+      if (!recipeResponse) {
+        return null;
+      }
+
+      const categoryResponse = await ctx.db.query.categories.findFirst({
+        where: (categories, { eq }) =>
+          eq(categories.id, recipeResponse.categoryId),
+        columns: { createdAt: false },
+      });
+
+      if (!categoryResponse) {
+        return null;
+      }
+
+      return { ...recipeResponse, categoryTitle: categoryResponse.title };
+    }),
   addRecipe: publicProcedure
     .input(
       z.object({
@@ -48,18 +86,22 @@ export const recipes = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.transaction(async (tx) => {
+        const capitalizedTitle = capitalize(input.name);
+        const capitalizedAuthor = capitalize(input.author);
+
         const [newRecipe] = await tx
           .insert(recipesSchema)
           .values({
-            title: input.name,
+            title: capitalizedTitle,
             categoryId: input.categoryId,
             description: input.description,
-            author: input.author,
+            author: capitalizedAuthor,
             id: input.slug,
           })
           .returning();
 
         if (!newRecipe) {
+          tx.rollback();
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Failed to create recipe",
