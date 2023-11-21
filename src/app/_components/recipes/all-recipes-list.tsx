@@ -4,9 +4,19 @@ import { api } from "~/trpc/react";
 import { RecipeCard } from "./recipe-card";
 import { NoRecipes } from "./no-recipes";
 import { Loader2 } from "lucide-react";
+import { useSearch } from "~/shared/store/store";
+import { useDebounce } from "usehooks-ts";
+
 export const AllRecipesList = () => {
-  const [recipes, { isFetching }] =
-    api.recipes.getAllRecipes.useSuspenseQuery();
+  const search = useSearch((state) => state.search);
+  const debouncedSearch = useDebounce<string>(search, 500);
+
+  const [recipes, { isFetching }] = api.recipes.getAllRecipes.useSuspenseQuery(
+    {
+      search: debouncedSearch,
+    },
+    { keepPreviousData: true },
+  );
 
   return (
     <>
