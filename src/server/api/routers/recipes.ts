@@ -23,21 +23,28 @@ export const recipes = createTRPCRouter({
 
     return recipesResponse;
   }),
-  getAllRecipes: publicProcedure.query(async ({ ctx }) => {
-    const recipesResponse = await ctx.db.query.recipes.findMany({
-      orderBy: desc(recipesSchema.createdAt),
-      with: {
-        ingredientsToRecipes: {
-          with: {
-            ingredient: true,
+  getAllRecipes: publicProcedure
+    .input(z.object({ search: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const recipesResponse = await ctx.db.query.recipes.findMany({
+        where: (recipes, { ilike, or }) =>
+          or(
+            ilike(recipes.title, `%${input.search}%`),
+            ilike(recipes.description, `%${input.search}%`),
+          ),
+        orderBy: desc(recipesSchema.createdAt),
+        with: {
+          ingredientsToRecipes: {
+            with: {
+              ingredient: true,
+            },
           },
         },
-      },
-      columns: { createdAt: false },
-    });
+        columns: { createdAt: false },
+      });
 
-    return recipesResponse;
-  }),
+      return recipesResponse;
+    }),
   getRecipeById: publicProcedure
     .input(
       z.object({
