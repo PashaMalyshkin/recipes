@@ -28,12 +28,13 @@ export const recipes = createTRPCRouter({
       z.object({ search: z.string(), limit: z.number(), offset: z.number() }),
     )
     .query(async ({ ctx, input }) => {
+      const where = or(
+        ilike(recipesSchema.title, `%${input.search}%`),
+        ilike(recipesSchema.description, `%${input.search}%`),
+      );
+
       const recipesResponse = await ctx.db.query.recipes.findMany({
-        where: (recipes, { ilike, or }) =>
-          or(
-            ilike(recipes.title, `%${input.search}%`),
-            ilike(recipes.description, `%${input.search}%`),
-          ),
+        where,
         orderBy: desc(recipesSchema.createdAt),
         with: {
           ingredientsToRecipes: {
@@ -52,12 +53,7 @@ export const recipes = createTRPCRouter({
           count: sql<number>`cast(count(${recipesSchema.id}) as int)`,
         })
         .from(recipesSchema)
-        .where(
-          or(
-            ilike(recipesSchema.title, `%${input.search}%`),
-            ilike(recipesSchema.description, `%${input.search}%`),
-          ),
-        );
+        .where(where);
 
       return { recipes: recipesResponse, count: count[0]?.count ?? 0 };
     }),
