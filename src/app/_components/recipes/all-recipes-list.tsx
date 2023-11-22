@@ -28,9 +28,6 @@ export const AllRecipesList = () => {
   );
   const currentPage = offset / limit + 1;
   const totalPages = Math.ceil(data?.count / limit);
-  const isLastPage = currentPage >= totalPages;
-  const isFirstPage = offset === 0;
-
   return (
     <>
       <div className="h-8 w-8">
@@ -45,17 +42,13 @@ export const AllRecipesList = () => {
             ))}
           </ul>
         )}
-        <div className="flex flex-col gap-2">
-          <div className="m-auto w-fit text-white">
-            Page {currentPage} of {totalPages}
-          </div>
-          {data.recipes.length > 0 && (
-            <RecipesListPagination
-              isFirstPage={isFirstPage}
-              isLastPage={isLastPage}
-            />
-          )}
-        </div>
+
+        {data.recipes.length > 0 && (
+          <RecipesListPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+          />
+        )}
       </div>
     </>
   );
