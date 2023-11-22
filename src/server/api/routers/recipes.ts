@@ -1,4 +1,4 @@
-import { desc, sql } from "~/server/db/schema/index";
+import { desc, ilike, or, sql } from "~/server/db/schema/index";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { recipes as recipesSchema } from "~/server/db/schema/recipes";
 import { ingredientsToRecipes } from "~/server/db/schema/ingredients";
@@ -51,9 +51,15 @@ export const recipes = createTRPCRouter({
         .select({
           count: sql<number>`cast(count(${recipesSchema.id}) as int)`,
         })
-        .from(recipesSchema);
+        .from(recipesSchema)
+        .where(
+          or(
+            ilike(recipesSchema.title, `%${input.search}%`),
+            ilike(recipesSchema.description, `%${input.search}%`),
+          ),
+        );
 
-      return { recipes: recipesResponse, count: count[0]?.count };
+      return { recipes: recipesResponse, count: count[0]?.count ?? 0 };
     }),
   getRecipeById: publicProcedure
     .input(

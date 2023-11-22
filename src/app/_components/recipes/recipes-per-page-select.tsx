@@ -1,10 +1,6 @@
 "use client";
 
 import {
-  usePaginationActions,
-  usePaginationLimit,
-} from "~/shared/store/pagination-store";
-import {
   Select,
   SelectContent,
   SelectGroup,
@@ -12,12 +8,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../_components/ui/select";
+import {
+  useRecipesActions,
+  useRecipesPaginationLimit,
+} from "~/shared/store/recipes-store";
 
 export const RecipesPerPageSelect = () => {
-  const limit = usePaginationLimit();
-  const { setLimit } = usePaginationActions();
+  const limit = useRecipesPaginationLimit();
+  const { setLimit } = useRecipesActions();
 
-  console.log(limit);
   return (
     <Select onValueChange={setLimit} value={limit.toString()}>
       <SelectTrigger className="w-[180px]">

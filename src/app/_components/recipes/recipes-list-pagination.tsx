@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "../ui/button";
-import { usePaginationActions } from "~/shared/store/pagination-store";
+import { useRecipesActions } from "~/shared/store/recipes-store";
 
 export const RecipesListPagination = ({
   isFirstPage,
@@ -9,7 +9,7 @@ export const RecipesListPagination = ({
   isFirstPage: boolean;
   isLastPage: boolean;
 }) => {
-  const { increaseOffset, decreaseOffset } = usePaginationActions();
+  const { increaseOffset, decreaseOffset } = useRecipesActions();
 
   return (
     <div className="flex items-center justify-center gap-4">

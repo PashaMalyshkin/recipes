@@ -23,7 +23,7 @@ export const RecipeCard: React.FC<{
       className="cursor-pointer duration-300 hover:scale-105"
       onClick={handleNavigate}
     >
-      <Card className="h-full min-h-[300px]">
+      <Card className="h-[300px]">
         <CardHeader>
           <CardTitle className="truncate leading-8" title={recipe.title}>
             {recipe.title}
