@@ -158,11 +158,11 @@ export const IngredientsComboboxContent: FC<{
                 className="w-[calc(var(--radix-popover-trigger-width)-30px)] cursor-pointer truncate"
                 key={ingredient.id}
                 value={ingredient.title}
-                onSelect={(selectedIngredientTitle) => {
-                  if (isSelected(selectedIngredientTitle)) {
+                onSelect={() => {
+                  if (isSelected(ingredient.title)) {
                     const filteredIngredients = selectedIngredients.filter(
                       (currentIngredient) =>
-                        currentIngredient.title !== selectedIngredientTitle,
+                        currentIngredient.title !== ingredient.title,
                     );
 
                     return onSelectIngredients(filteredIngredients);

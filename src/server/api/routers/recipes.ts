@@ -1,4 +1,4 @@
-import { desc } from "~/server/db/schema/index";
+import { desc, ilike, or, sql } from "~/server/db/schema/index";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { recipes as recipesSchema } from "~/server/db/schema/recipes";
 import { ingredientsToRecipes } from "~/server/db/schema/ingredients";
@@ -24,14 +24,17 @@ export const recipes = createTRPCRouter({
     return recipesResponse;
   }),
   getAllRecipes: publicProcedure
-    .input(z.object({ search: z.string() }))
+    .input(
+      z.object({ search: z.string(), limit: z.number(), offset: z.number() }),
+    )
     .query(async ({ ctx, input }) => {
+      const where = or(
+        ilike(recipesSchema.title, `%${input.search}%`),
+        ilike(recipesSchema.description, `%${input.search}%`),
+      );
+
       const recipesResponse = await ctx.db.query.recipes.findMany({
-        where: (recipes, { ilike, or }) =>
-          or(
-            ilike(recipes.title, `%${input.search}%`),
-            ilike(recipes.description, `%${input.search}%`),
-          ),
+        where,
         orderBy: desc(recipesSchema.createdAt),
         with: {
           ingredientsToRecipes: {
@@ -41,9 +44,18 @@ export const recipes = createTRPCRouter({
           },
         },
         columns: { createdAt: false },
+        limit: input.limit,
+        offset: input.offset,
       });
 
-      return recipesResponse;
+      const count = await ctx.db
+        .select({
+          count: sql<number>`cast(count(${recipesSchema.id}) as int)`,
+        })
+        .from(recipesSchema)
+        .where(where);
+
+      return { recipes: recipesResponse, count: count[0]?.count ?? 0 };
     }),
   getRecipeById: publicProcedure
     .input(
