@@ -1,4 +1,13 @@
-import { desc, ilike, or, sql } from "~/server/db/schema/index";
+import {
+  desc,
+  ilike,
+  inArray,
+  or,
+  sql,
+  eq,
+  and,
+  ne,
+} from "~/server/db/schema/index";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { recipes as recipesSchema } from "~/server/db/schema/recipes";
 import { ingredientsToRecipes } from "~/server/db/schema/ingredients";
@@ -61,6 +70,7 @@ export const recipes = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
+        limit: z.number().optional().default(3),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -90,7 +100,35 @@ export const recipes = createTRPCRouter({
         return null;
       }
 
-      return { ...recipeResponse, categoryTitle: categoryResponse.title };
+      const ingredientsIds = recipeResponse.ingredientsToRecipes.map(
+        ({ ingredientId }) => ingredientId,
+      );
+
+      const relatedRecipes = await ctx.db
+        .select({
+          id: recipesSchema.id,
+          title: recipesSchema.title,
+          description: recipesSchema.description,
+        })
+        .from(recipesSchema)
+        .leftJoin(
+          ingredientsToRecipes,
+          eq(recipesSchema.id, ingredientsToRecipes.recipeId),
+        )
+        .where(
+          and(
+            inArray(ingredientsToRecipes.ingredientId, ingredientsIds),
+            ne(recipesSchema.id, input.id),
+          ),
+        )
+        .limit(input.limit)
+        .groupBy(recipesSchema.id);
+
+      return {
+        ...recipeResponse,
+        categoryTitle: categoryResponse.title,
+        relatedRecipes,
+      };
     }),
   addRecipe: publicProcedure
     .input(
