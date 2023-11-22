@@ -1,7 +1,7 @@
 import { createTRPCRouter } from "~/server/api/trpc";
-import { recipes } from "./routers/recipes";
-import { categories } from "./routers/categories";
-import { ingredients } from "./routers/ingredients";
+import { recipes } from "./recipes/recipes";
+import { categories } from "./categories/categories";
+import { ingredients } from "./ingredients/ingredients";
 import type { inferRouterOutputs } from "@trpc/server";
 
 export const appRouter = createTRPCRouter({

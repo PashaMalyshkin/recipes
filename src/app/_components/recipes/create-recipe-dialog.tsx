@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "~/trpc/react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import { useState } from "react";
@@ -13,12 +13,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
-import { IngredientsCombobox } from "./ingredients/ingredients-combobox";
+} from "../ui/dialog";
+import { IngredientsCombobox } from "../ingredients/ingredients-combobox";
 import type { FormValues } from "~/shared/types/form-values";
-import { RecipeInput } from "./recipes/recipe-input";
-import { RecipeTextarea } from "./recipes/recipe-textarea";
-import { SelectCategory } from "./select-category";
+import { RecipeInput } from "./recipe-input";
+import { RecipeTextarea } from "./recipe-textarea";
+import { SelectCategory } from "../categories/select-category";
 
 export const validationRules = {
   name: {

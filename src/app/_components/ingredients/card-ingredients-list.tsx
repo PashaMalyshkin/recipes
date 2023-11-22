@@ -1,4 +1,4 @@
-import type { RouterOutputs } from "~/server/api/root";
+import type { RouterOutputs } from "~/server/api/routers/root";
 
 type IngredientsForRecipe =
   RouterOutputs["recipes"]["getLastRecipes"][number]["ingredientsToRecipes"];
