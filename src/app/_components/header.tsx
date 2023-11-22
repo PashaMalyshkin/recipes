@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Croissant } from "lucide-react";
-import { CreateRecipeDialog } from "./create-recipe-dialog";
+import { CreateRecipeDialog } from "./recipes/create-recipe-dialog";
 
 export const Header = () => {
   return (

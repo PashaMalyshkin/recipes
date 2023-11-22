@@ -1,12 +1,12 @@
 import { Controller } from "react-hook-form";
-import { Label } from "./ui/label";
+import { Label } from "../ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "../ui/select";
 import { Loader2 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
