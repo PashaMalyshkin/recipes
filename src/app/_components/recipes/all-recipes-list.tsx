@@ -45,12 +45,17 @@ export const AllRecipesList = () => {
             ))}
           </ul>
         )}
-        {data.recipes.length > 0 && (
-          <RecipesListPagination
-            isFirstPage={isFirstPage}
-            isLastPage={isLastPage}
-          />
-        )}
+        <div className="flex flex-col gap-2">
+          <div className="m-auto w-fit text-white">
+            Page {currentPage} of {totalPages}
+          </div>
+          {data.recipes.length > 0 && (
+            <RecipesListPagination
+              isFirstPage={isFirstPage}
+              isLastPage={isLastPage}
+            />
+          )}
+        </div>
       </div>
     </>
   );
